@@ -60,19 +60,29 @@ function Header() {
 function Form() {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [travel, setTravel] = useState("");
+  const [selectedTravel, setSelectedTravel] = useState(initialItems[0]);
 
   function handleSubmit(e) {
     e.preventDefault();
 
     if (!description) return;
 
-    const newTrip = {
-      title: travel,
-      date: "",
-      items: [{ description, quantity, packed: false, id: Date.now() }],
+    const newItem = {
+      id: Date.now,
+      description,
+      quantity,
+      packed: false,
     };
-    console.log(newTrip);
+
+    const updatedItems = [...selectedTravel.items, newItem];
+    const updatedTravel = { ...selectedTravel, items: updatedItems };
+
+    const updateInitialItems = initialItems.map((item) =>
+      item.id === updatedTravel.id ? updatedTravel : item
+    );
+
+    console.log(updateInitialItems);
+
     setDescription("");
     setQuantity(1);
   }
@@ -80,9 +90,18 @@ function Form() {
   return (
     <form className="add-form" onSubmit={handleSubmit}>
       <h3>👩🏻‍💻 Honey! Have we packed everything?...</h3>
-      <select value={travel} onChange={(e) => setTravel(e.target.value)}>
+      <select
+        value={selectedTravel.id}
+        onChange={(e) =>
+          setSelectedTravel(
+            initialItems.find(
+              (travel) => travel.id === parseInt(e.target.value, 10)
+            )
+          )
+        }
+      >
         {initialItems.map((travel) => (
-          <option value={travel.title} key={travel.id}>
+          <option value={travel} key={travel.id}>
             {travel.title}
           </option>
         ))}
