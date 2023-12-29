@@ -1,5 +1,4 @@
-import React, { Component, useState } from "react";
-import { Modal } from "./components/Modal";
+import React, { useState } from "react";
 
 const initialItems = [
   {
@@ -39,20 +38,6 @@ const initialItems = [
   },
 ];
 
-class Home extends Component {
-  onInputChanged = (changedText) => {
-    const newTrip = {
-      id: initialItems.length + 1,
-      title: changedText,
-      date: "",
-      items: [],
-    };
-
-    const updatedItems = [...initialItems, newTrip];
-    initialItems(updatedItems);
-  };
-}
-
 export default function App() {
   return (
     <div className="app">
@@ -73,29 +58,67 @@ function Header() {
 }
 
 function Form() {
-  // const [description, setDescription] = useState("");
-  const [openModal, setOpenModal] = useState(false);
+  const [description, setDescription] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [selectedTravel, setSelectedTravel] = useState(initialItems[0]);
 
-  //   function addTravel() {
-  //     setIsAddingTravel(true);
-  //   }
   function handleSubmit(e) {
     e.preventDefault();
+
+    if (!description) return;
+
+    const newItem = {
+      id: Date.now,
+      description,
+      quantity,
+      packed: false,
+    };
+
+    const updatedItems = [...selectedTravel.items, newItem];
+    const updatedTravel = { ...selectedTravel, items: updatedItems };
+
+    const updateInitialItems = initialItems.map((item) =>
+      item.id === updatedTravel.id ? updatedTravel : item
+    );
+
+    console.log(updateInitialItems);
+
+    setDescription("");
+    setQuantity(1);
   }
 
   return (
     <form className="add-form" onSubmit={handleSubmit}>
       <h3>👩🏻‍💻 Honey! Have we packed everything?...</h3>
-      <select>
+      <select
+        value={selectedTravel.id}
+        onChange={(e) =>
+          setSelectedTravel(
+            initialItems.find(
+              (travel) => travel.id === parseInt(e.target.value, 10)
+            )
+          )
+        }
+      >
         {initialItems.map((travel) => (
-          <option value={travel.title} key={travel.id}>
+          <option value={travel} key={travel.id}>
             {travel.title}
           </option>
         ))}
-        <option onClick={() => setOpenModal(true)}>+ new travel</option>
       </select>
-      {openModal && <Modal onInputChanged={this.onInputChanged} />}
-      <input type="text" placeholder="Items..." />
+      <select value={quantity} onChange={(e) => setQuantity(e.target.value)}>
+        {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
+          <option value={num} key={num}>
+            {num}
+          </option>
+        ))}
+      </select>
+      <input
+        type="text"
+        placeholder="Items..."
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
       <button>Add</button>
     </form>
   );
@@ -105,7 +128,7 @@ function Tupack() {
     <div className="list">
       <h5> My travel packing list: 📋</h5>
       {initialItems.map((travel) => (
-        <Travel travel={travel} />
+        <Travel travel={travel} key={travel.id} />
       ))}
     </div>
   );
@@ -117,7 +140,7 @@ function Travel({ travel }) {
       <h4>🏝️{travel.title}</h4>
       <ul key={travel.id}>
         {travel.items.map((item) => (
-          <Item item={item} />
+          <Item item={item} key={item.id} />
         ))}
       </ul>
     </div>
