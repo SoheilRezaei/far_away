@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Component, useState } from "react";
 import { Modal } from "./components/Modal";
 
 const initialItems = [
@@ -39,6 +39,20 @@ const initialItems = [
   },
 ];
 
+class Home extends Component {
+  onInputChanged = (changedText) => {
+    const newTrip = {
+      id: initialItems.length + 1,
+      title: changedText,
+      date: "",
+      items: [],
+    };
+
+    const updatedItems = [...initialItems, newTrip];
+    initialItems(updatedItems);
+  };
+}
+
 export default function App() {
   return (
     <div className="app">
@@ -67,18 +81,6 @@ function Form() {
   //   }
   function handleSubmit(e) {
     e.preventDefault();
-
-    // if (isAddingTravel && title.trim() !== "") {
-    //   const newTrip = {
-    //     id: initialItems.length + 1,
-    //     title: title,
-    //     date: "",
-    //     items: [],
-    //   };
-
-    //     const updatedItems = [...initialItems, newTrip];
-    //     initialItems(updatedItems);
-    //   }
   }
 
   return (
