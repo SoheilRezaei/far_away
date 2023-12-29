@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Modal } from "./components/Modal";
+
 const initialItems = [
   {
     id: 1,
@@ -57,27 +59,26 @@ function Header() {
 }
 
 function Form() {
-  const [title, setTitle] = useState("");
   // const [description, setDescription] = useState("");
-  const [isAddingTravel, setIsAddingTravel] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
 
-  function addTravel() {
-    setIsAddingTravel(true);
-  }
+  //   function addTravel() {
+  //     setIsAddingTravel(true);
+  //   }
   function handleSubmit(e) {
     e.preventDefault();
 
-    if (isAddingTravel && title.trim() !== "") {
-      const newTrip = {
-        id: initialItems.length + 1,
-        title: title,
-        date: "",
-        items: [],
-      };
+    // if (isAddingTravel && title.trim() !== "") {
+    //   const newTrip = {
+    //     id: initialItems.length + 1,
+    //     title: title,
+    //     date: "",
+    //     items: [],
+    //   };
 
-      const updatedItems = [...initialItems, newTrip];
-      initialItems(updatedItems);
-    }
+    //     const updatedItems = [...initialItems, newTrip];
+    //     initialItems(updatedItems);
+    //   }
   }
 
   return (
@@ -89,22 +90,14 @@ function Form() {
             {travel.title}
           </option>
         ))}
-        <option onClick={addTravel}>+ new travel</option>
+        <option onClick={() => setOpenModal(true)}>+ new travel</option>
       </select>
-      {isAddingTravel && (
-        <input
-          type="text"
-          placeholder="Where to?"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        ></input>
-      )}
+      {openModal && <Modal onInputChanged={this.onInputChanged} />}
       <input type="text" placeholder="Items..." />
       <button>Add</button>
     </form>
   );
 }
-
 function Tupack() {
   return (
     <div className="list">
