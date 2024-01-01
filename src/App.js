@@ -39,11 +39,16 @@ const initialItems = [
 ];
 
 export default function App() {
+  const [travels, setTravels] = useState(initialItems);
+  function handleAddButton(updatedTravels) {
+    setTravels(updatedTravels);
+    console.log(travels);
+  }
   return (
     <div className="app">
       <Header />
-      <Form />
-      <Tupack />
+      <Form onAddHandle={handleAddButton} />
+      <Tupack travel={travels} />
       <Footer />
     </div>
   );
@@ -57,10 +62,10 @@ function Header() {
   );
 }
 
-function Form() {
+function Form({ onAddHandle }) {
+  const [selectedTravel, setSelectedTravel] = useState(initialItems[0]);
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [selectedTravel, setSelectedTravel] = useState(initialItems[0]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -73,20 +78,29 @@ function Form() {
       quantity: parseInt(quantity),
       packed: false,
     };
+    console.log(selectedTravel);
+    const updatedItems = [...selectedTravel.items, newItem];
 
-    const updatedItems = [...initialItems[selectedTravel].items, newItem];
+    console.log(updatedItems);
 
     const updatedTravel = {
-      ...initialItems[selectedTravel],
+      ...selectedTravel,
       items: updatedItems,
     };
 
-    const updateInitialItems = initialItems.map((item, index) =>
-      index === selectedTravel ? updatedTravel : item
+    console.log(updatedTravel);
+    console.log(selectedTravel.id);
+
+    initialItems.forEach(
+      (travel, index) => {
+        if (travel.id === updatedTravel.id) {
+          initialItems[index] = updatedTravel;
+        }
+      }
+      // index + 1 === selectedTravel.id ? updatedTravel : travel
     );
 
-    console.log(updateInitialItems);
-
+    onAddHandle(initialItems);
     setDescription("");
     setQuantity(1);
   }
@@ -96,7 +110,9 @@ function Form() {
       <h3>👩🏻‍💻 Honey! Have we packed everything?...</h3>
       <select
         value={selectedTravel}
-        onChange={(e) => setSelectedTravel(parseInt(e.target.value, 10))}
+        onChange={(e) =>
+          setSelectedTravel(initialItems[parseInt(e.target.value)])
+        }
       >
         {initialItems.map((travel, index) => (
           <option value={index} key={travel.id}>
@@ -121,11 +137,11 @@ function Form() {
     </form>
   );
 }
-function Tupack() {
+function Tupack({ travel }) {
   return (
     <div className="list">
       <h5> My travel packing list: 📋</h5>
-      {initialItems.map((travel) => (
+      {travel.map((travel) => (
         <Travel travel={travel} key={travel.id} />
       ))}
     </div>
