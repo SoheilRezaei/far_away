@@ -68,17 +68,21 @@ function Form() {
     if (!description) return;
 
     const newItem = {
-      id: Date.now,
+      id: Date.now(),
       description,
-      quantity,
+      quantity: parseInt(quantity),
       packed: false,
     };
 
-    const updatedItems = [...selectedTravel.items, newItem];
-    const updatedTravel = { ...selectedTravel, items: updatedItems };
+    const updatedItems = [...initialItems[selectedTravel].items, newItem];
 
-    const updateInitialItems = initialItems.map((item) =>
-      item.id === updatedTravel.id ? updatedTravel : item
+    const updatedTravel = {
+      ...initialItems[selectedTravel],
+      items: updatedItems,
+    };
+
+    const updateInitialItems = initialItems.map((item, index) =>
+      index === selectedTravel ? updatedTravel : item
     );
 
     console.log(updateInitialItems);
@@ -91,17 +95,11 @@ function Form() {
     <form className="add-form" onSubmit={handleSubmit}>
       <h3>👩🏻‍💻 Honey! Have we packed everything?...</h3>
       <select
-        value={selectedTravel.id}
-        onChange={(e) =>
-          setSelectedTravel(
-            initialItems.find(
-              (travel) => travel.id === parseInt(e.target.value, 10)
-            )
-          )
-        }
+        value={selectedTravel}
+        onChange={(e) => setSelectedTravel(parseInt(e.target.value, 10))}
       >
-        {initialItems.map((travel) => (
-          <option value={travel} key={travel.id}>
+        {initialItems.map((travel, index) => (
+          <option value={index} key={travel.id}>
             {travel.title}
           </option>
         ))}
@@ -119,7 +117,7 @@ function Form() {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
-      <button>Add</button>
+      <button type="submit">Add</button>
     </form>
   );
 }
