@@ -109,13 +109,17 @@ function Form({ onAddHandle }) {
     <form className="add-form" onSubmit={handleSubmit}>
       <h3>👩🏻‍💻 Honey! Have we packed everything?...</h3>
       <select
-        value={selectedTravel}
-        onChange={(e) =>
-          setSelectedTravel(initialItems[parseInt(e.target.value)])
+        value={selectedTravel.id} // Update the value to selectedTravel.id
+        onChange={
+          (e) =>
+            setSelectedTravel(
+              initialItems.find((item) => item.id === parseInt(e.target.value))
+            ) // Update the onChange handler to find the selected travel by id
         }
       >
         {initialItems.map((travel, index) => (
-          <option value={index} key={travel.id}>
+          <option value={travel.id} key={travel.id}>
+            {" "}
             {travel.title}
           </option>
         ))}
