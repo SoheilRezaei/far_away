@@ -44,11 +44,17 @@ export default function App() {
     setTravels(updatedTravels);
     console.log(travels);
   }
+
+  function handleDeleteItem(updatedTravels) {
+    setTravels(updatedTravels);
+    console.log(travels);
+  }
+
   return (
     <div className="app">
       <Header />
       <Form onAddHandle={handleAddButton} />
-      <Tupack travel={travels} />
+      <Tupack travel={travels} onDeleteHandle={handleDeleteItem} />
       <Footer />
     </div>
   );
@@ -78,18 +84,12 @@ function Form({ onAddHandle }) {
       quantity: parseInt(quantity),
       packed: false,
     };
-    console.log(selectedTravel);
     const updatedItems = [...selectedTravel.items, newItem];
-
-    console.log(updatedItems);
 
     const updatedTravel = {
       ...selectedTravel,
       items: updatedItems,
     };
-
-    console.log(updatedTravel);
-    console.log(selectedTravel.id);
 
     initialItems.forEach(
       (travel, index) => {
@@ -117,7 +117,7 @@ function Form({ onAddHandle }) {
             ) // Update the onChange handler to find the selected travel by id
         }
       >
-        {initialItems.map((travel, index) => (
+        {initialItems.map((travel) => (
           <option value={travel.id} key={travel.id}>
             {" "}
             {travel.title}
@@ -141,37 +141,60 @@ function Form({ onAddHandle }) {
     </form>
   );
 }
-function Tupack({ travel }) {
+
+function Tupack({ travel, onDeleteHandle }) {
+  function handleDeleteItem(travel_id, item_id) {
+    console.log(travel_id, item_id);
+    const updatedTravels = travel.forEach((travel) => {
+      console.log(travel);
+      if (travel.id === travel_id) {
+        travel.items = travel.items.filter((item) => item.id !== item_id);
+      }
+    });
+    console.log(updatedTravels);
+    onDeleteHandle(updatedTravels);
+  }
+
+  console.log(travel);
+
   return (
     <div className="list">
       <h5> My travel packing list: 📋</h5>
       {travel.map((travel) => (
-        <Travel travel={travel} key={travel.id} />
+        <Travel
+          travel={travel}
+          onDeleteItem={handleDeleteItem}
+          key={travel.id}
+        />
       ))}
     </div>
   );
 }
 
-function Travel({ travel }) {
+function Travel({ travel, onDeleteItem }) {
+  function parseDeleteItem(item_id) {
+    console.log(item_id);
+    onDeleteItem(travel.id, item_id);
+  }
   return (
     <div>
       <h4>🏝️{travel.title}</h4>
       <ul key={travel.id}>
         {travel.items.map((item) => (
-          <Item item={item} key={item.id} />
+          <Item item={item} onDeleteItem={parseDeleteItem} key={item.id} />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ item }) {
+function Item({ item, onDeleteItem }) {
   return (
     <li>
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
       </span>
-      <button>❌</button>
+      <button onClick={() => onDeleteItem(item.id)}>❌</button>
     </li>
   );
 }
