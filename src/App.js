@@ -50,11 +50,20 @@ export default function App() {
     console.log(travels);
   }
 
+  function handleToggleItem(updatedTravels) {
+    setTravels(updatedTravels);
+    console.log(travels);
+  }
+
   return (
     <div className="app">
       <Header />
       <Form onAddHandle={handleAddButton} />
-      <Tupack travel={travels} onDeleteHandle={handleDeleteItem} />
+      <Tupack
+        travel={travels}
+        onDeleteHandle={handleDeleteItem}
+        onCheckHandle={handleToggleItem}
+      />
       <Footer />
     </div>
   );
@@ -142,7 +151,7 @@ function Form({ onAddHandle }) {
   );
 }
 
-function Tupack({ travel, onDeleteHandle }) {
+function Tupack({ travel, onDeleteHandle, onCheckHandle }) {
   function handleDeleteItem(travel_id, item_id) {
     console.log(travel_id, item_id);
     const updatedTravels = travel.forEach((travel) => {
@@ -155,6 +164,19 @@ function Tupack({ travel, onDeleteHandle }) {
     onDeleteHandle(updatedTravels);
   }
 
+  function handleCheckItem(travel_id, item_id) {
+    console.log(travel_id, item_id);
+    const updatedTravels = travel.forEach((travel) => {
+      console.log(travel);
+      if (travel.id === travel_id) {
+        travel.items = travel.items.map((item) =>
+          item.id === item_id ? { ...item, packed: !item.packed } : item
+        );
+      }
+    });
+    console.log(updatedTravels);
+    onCheckHandle(updatedTravels);
+  }
   console.log(travel);
 
   return (
@@ -164,6 +186,7 @@ function Tupack({ travel, onDeleteHandle }) {
         <Travel
           travel={travel}
           onDeleteItem={handleDeleteItem}
+          onCheckHandle={handleCheckItem}
           key={travel.id}
         />
       ))}
@@ -171,26 +194,40 @@ function Tupack({ travel, onDeleteHandle }) {
   );
 }
 
-function Travel({ travel, onDeleteItem }) {
+function Travel({ travel, onDeleteItem, onCheckHandle }) {
   function parseDeleteItem(item_id) {
     console.log(item_id);
     onDeleteItem(travel.id, item_id);
+  }
+  function parseCheckItem(item_id) {
+    console.log(item_id);
+    onCheckHandle(travel.id, item_id);
   }
   return (
     <div>
       <h4>🏝️{travel.title}</h4>
       <ul key={travel.id}>
         {travel.items.map((item) => (
-          <Item item={item} onDeleteItem={parseDeleteItem} key={item.id} />
+          <Item
+            item={item}
+            onDeleteItem={parseDeleteItem}
+            onCheckHandle={parseCheckItem}
+            key={item.id}
+          />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ item, onDeleteItem }) {
+function Item({ item, onDeleteItem, onCheckHandle }) {
   return (
     <li>
+      <input
+        type="checkbox"
+        checked={item.packed}
+        onChange={() => onCheckHandle(item.id)}
+      />
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
       </span>
