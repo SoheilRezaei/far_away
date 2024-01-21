@@ -40,6 +40,7 @@ const initialItems = [
 
 export default function App() {
   const [travels, setTravels] = useState(initialItems);
+
   function handleAddButton(updatedTravels) {
     setTravels(updatedTravels);
     console.log(travels);
@@ -64,7 +65,7 @@ export default function App() {
         onDeleteHandle={handleDeleteItem}
         onCheckHandle={handleToggleItem}
       />
-      <Footer />
+      <Footer travel={travels} />
     </div>
   );
 }
@@ -100,14 +101,11 @@ function Form({ onAddHandle }) {
       items: updatedItems,
     };
 
-    initialItems.forEach(
-      (travel, index) => {
-        if (travel.id === updatedTravel.id) {
-          initialItems[index] = updatedTravel;
-        }
+    initialItems.forEach((travel, index) => {
+      if (travel.id === updatedTravel.id) {
+        initialItems[index] = updatedTravel;
       }
-      // index + 1 === selectedTravel.id ? updatedTravel : travel
-    );
+    });
 
     onAddHandle(initialItems);
     setDescription("");
@@ -118,12 +116,11 @@ function Form({ onAddHandle }) {
     <form className="add-form" onSubmit={handleSubmit}>
       <h3>👩🏻‍💻 Honey! Have we packed everything?...</h3>
       <select
-        value={selectedTravel.id} // Update the value to selectedTravel.id
-        onChange={
-          (e) =>
-            setSelectedTravel(
-              initialItems.find((item) => item.id === parseInt(e.target.value))
-            ) // Update the onChange handler to find the selected travel by id
+        value={selectedTravel.id}
+        onChange={(e) =>
+          setSelectedTravel(
+            initialItems.find((item) => item.id === parseInt(e.target.value))
+          )
         }
       >
         {initialItems.map((travel) => (
@@ -154,11 +151,14 @@ function Form({ onAddHandle }) {
 function Tupack({ travel, onDeleteHandle, onCheckHandle }) {
   function handleDeleteItem(travel_id, item_id) {
     console.log(travel_id, item_id);
-    const updatedTravels = travel.forEach((travel) => {
-      console.log(travel);
-      if (travel.id === travel_id) {
-        travel.items = travel.items.filter((item) => item.id !== item_id);
+    let updatedTravels = travel.map((trip) => {
+      if (trip.id === travel_id) {
+        return {
+          ...trip,
+          items: trip.items.filter((item) => item.id !== item_id),
+        };
       }
+      return trip;
     });
     console.log(updatedTravels);
     onDeleteHandle(updatedTravels);
@@ -166,18 +166,20 @@ function Tupack({ travel, onDeleteHandle, onCheckHandle }) {
 
   function handleCheckItem(travel_id, item_id) {
     console.log(travel_id, item_id);
-    const updatedTravels = travel.forEach((travel) => {
-      console.log(travel);
-      if (travel.id === travel_id) {
-        travel.items = travel.items.map((item) =>
-          item.id === item_id ? { ...item, packed: !item.packed } : item
-        );
+    const updatedTravels = travel.map((trip) => {
+      if (trip.id === travel_id) {
+        return {
+          ...trip,
+          items: trip.items.map((item) =>
+            item.id === item_id ? { ...item, packed: !item.packed } : item
+          ),
+        };
       }
+      return trip;
     });
     console.log(updatedTravels);
     onCheckHandle(updatedTravels);
   }
-  console.log(travel);
 
   return (
     <div className="list">
@@ -195,6 +197,23 @@ function Tupack({ travel, onDeleteHandle, onCheckHandle }) {
 }
 
 function Travel({ travel, onDeleteItem, onCheckHandle }) {
+  const [sortBy, setSortBy] = useState("input");
+  let sortedItems;
+  let sortedTravel = travel;
+  console.log(sortedTravel);
+
+  if (sortBy === "input") sortedItems = travel.items;
+  if (sortBy === "description")
+    sortedItems = travel.items
+      .slice()
+      .sort((a, b) => a.description.localeCompare(b.description));
+  if (sortBy === "packed")
+    sortedItems = travel.items
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed));
+
+  sortedTravel.items = sortedItems;
+
   function parseDeleteItem(item_id) {
     console.log(item_id);
     onDeleteItem(travel.id, item_id);
@@ -205,9 +224,9 @@ function Travel({ travel, onDeleteItem, onCheckHandle }) {
   }
   return (
     <div>
-      <h4>🏝️{travel.title}</h4>
-      <ul key={travel.id}>
-        {travel.items.map((item) => (
+      <h4>🏝️{sortedTravel.title}</h4>
+      <ul key={sortedTravel.id}>
+        {sortedTravel.items.map((item) => (
           <Item
             item={item}
             onDeleteItem={parseDeleteItem}
@@ -216,6 +235,14 @@ function Travel({ travel, onDeleteItem, onCheckHandle }) {
           />
         ))}
       </ul>
+
+      <div className="actions">
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="input">Sort by input order</option>
+          <option value="description">Sort by description</option>
+          <option value="packed">Sort by packed status</option>
+        </select>
+      </div>
     </div>
   );
 }
@@ -236,10 +263,27 @@ function Item({ item, onDeleteItem, onCheckHandle }) {
   );
 }
 
-function Footer() {
-  return (
-    <footer className="stats">
-      <em>You have X items listed for packing, and so far you've packed %X</em>
-    </footer>
-  );
+function Footer({ travel }) {
+  console.log(travel);
+
+  // if (!travel.items?.length)
+  //   return (
+  //     <p className="footer">
+  //       <em>Start adding items to packing list!</em>
+  //     </p>
+  //   );
+
+  // const numItems = travel.items.length;
+  // const numPacked = travel.items.filter((item) => item.packed).length;
+  // const precentage = Math.round((numPacked / numItems) * 100);
+  // return (
+  //   <footer className="stats">
+  //     <em>
+  //       {precentage === 100
+  //         ? "You got everything packed! 🎉"
+  //         : `You have {numItems} items listed for packing, and so far you've packed{" "}
+  //       {numPacked} ({precentage}%)`}
+  //     </em>
+  //   </footer>
+  // );
 }
